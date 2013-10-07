@@ -15,7 +15,7 @@ class SQLObject < MassObject
 
   def self.table_name
     unless @table_name
-      @table_name = self.class.underscore.pluralize
+      @table_name = self.to_s.underscore.pluralize
     end
 
     @table_name
