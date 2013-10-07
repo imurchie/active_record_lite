@@ -6,8 +6,7 @@ cats_db_file_name =
 DBConnection.open(cats_db_file_name)
 
 class Cat < SQLObject
-  set_table_name("cats")
-  my_attr_accessible(:id, :name, :owner_id)
+  my_attr_accessible(:name, :owner_id)
 end
 
 class Human < SQLObject
@@ -26,6 +25,11 @@ c = Cat.new(:name => "Gizmo", :owner_id => 1)
 c.save
 puts "new cat: #{c.inspect}"
 
+
+puts
+puts "Searching for human 1"
 h = Human.find(1)
 # just run an UPDATE; no values changed, so shouldnt hurt the db
 h.save
+
+p h.fname

@@ -15,5 +15,14 @@ class Human < SQLObject
   my_attr_accessible(:id, :fname, :lname, :house_id)
 end
 
+p Cat.where(:name => "Breakfast").first
+matt = Human.where(:fname => "Matt").first
+p matt
+
+puts
+puts "Testing Relation functionality"
+puts "getting cats named 'Breakfast'..."
 p Cat.where(:name => "Breakfast")
-p Human.where(:fname => "Matt")
+puts
+puts "getting cats named 'Breakfast' owned by owner 2 ('Matt')"
+p Cat.where(:name => "Breakfast").where(:owner_id => matt.id)
