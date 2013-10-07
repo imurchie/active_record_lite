@@ -1,7 +1,6 @@
 class MassObject
   def self.my_attr_accessible(*attributes)
     attributes.each do |attribute|
-      attr_accessor attribute
       self.attributes << attribute.to_s
     end
   end
@@ -12,7 +11,12 @@ class MassObject
 
   def self.parse_all(results)
     results.map do |params|
-      self.new(params)
+      obj = self.new
+      params.each do |k, v|
+        obj.instance_variable_set("@#{k}", v)
+      end
+
+      obj
     end
   end
 
