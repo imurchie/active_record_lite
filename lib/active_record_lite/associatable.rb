@@ -125,7 +125,8 @@ module Associatable
     define_method(name) do
       assoc2 = assoc1.other_class.assoc_params[assoc2]
 
-      results = DBConnection.execute(<<-SQL, self.instance_variable_get("@#{assoc1.foreign_key}"))
+      foreign_key_val = self.instance_variable_get("@#{assoc1.foreign_key}")
+      results = DBConnection.execute(<<-SQL, foreign_key_val)
         SELECT
           #{assoc2.other_table}.*
         FROM
