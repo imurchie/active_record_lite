@@ -13,6 +13,6 @@ module Searchable
 
     results = DBConnection.execute(query, *params.values)
 
-    map_results(results)
+    parse_all(results)
   end
 end
