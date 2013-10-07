@@ -15,7 +15,7 @@ class SQLObject < MassObject
 
   def self.table_name
     unless @table_name
-      self.class.underscore.pluralize
+      @table_name = self.class.underscore.pluralize
     end
 
     @table_name
@@ -34,17 +34,60 @@ class SQLObject < MassObject
   end
 
   def save
+    save!
+  rescue
+    false
+  end
+
+  def save!
     if self.id.nil?
-      create
+      create!
     else
-      update
+      update!
+    end
+  end
+
+  def method_missing(name, *args, &block)
+    possible_attr = name.to_s.sub( /=/, "")
+    if self.class.schema.keys.include?(possible_attr)
+      if name =~ /=/
+        # setter
+        self.class.class_eval do
+          define_method(name) do |value|
+            instance_variable_set("@#{possible_attr}", value)
+          end
+        end
+        self.send(name, *args)  # need to call the newly minted method
+      else
+        # getter
+        self.class.class_eval do
+          define_method(name) do
+            instance_variable_get("@#{possible_attr}")
+          end
+        end
+        self.send(name)  # need to call the newly minted method
+      end
+    else
+      super
     end
   end
 
 
   private
 
-    def create
+    # access the db schema in order to build the object correctly
+    def self.schema
+      unless @schema
+        @schema = {}
+        DBConnection.table_info(self.table_name) do |row|
+          @schema[row["name"]] = row["type"]
+        end
+      end
+
+      @schema
+    end
+
+    def create!
       query = <<-SQL
         INSERT INTO
           #{self.class.table_name} (#{attribute_strings.join(", ")})
@@ -58,7 +101,7 @@ class SQLObject < MassObject
       self
     end
 
-    def update
+    def update!
       query = <<-SQL
         UPDATE
           #{self.class.table_name}
