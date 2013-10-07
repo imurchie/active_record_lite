@@ -15,6 +15,7 @@ class MassObject
 
   def initialize(params = {})
     params.each do |attribute, value|
+      attribute = attribute.to_s
       if self.class.attributes.include?(attribute)
         self.send("#{attribute}=", value)
       else
