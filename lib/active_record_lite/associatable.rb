@@ -133,7 +133,7 @@ module Associatable
 
     define_method(name) do |reload = false|
       if !reload && self.instance_variable_get("@#{assoc1.name}")
-        return self.instance_variable_get("@#{assoc1.name}")
+        return self.instance_variable_get("@#{assoc1p.name}")
       end
 
       assoc2 = assoc1.other_class.assoc_params[assoc2]

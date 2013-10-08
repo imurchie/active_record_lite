@@ -53,7 +53,7 @@ class SQLObject < MassObject
   end
 
   def method_missing(name, *args, &block)
-    possible_attr = name.to_s.sub( /=/, "")
+    possible_attr = name.to_s.sub( /=$/, "")
     if self.class.schema.keys.include?(possible_attr)
       if name =~ /=/
         # setter
@@ -72,6 +72,15 @@ class SQLObject < MassObject
         end
         self.send(name)  # need to call the newly minted method
       end
+    else
+      super
+    end
+  end
+
+  def respond_to?(symbol)
+    possible_attr = name.to_s.sub( /=$/, "")
+    if self.class.schema.keys.include?(possible_attr)
+      true
     else
       super
     end

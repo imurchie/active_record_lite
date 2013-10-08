@@ -45,3 +45,4 @@ p matt
 puts
 cat = Cat.where(:id => 1).includes(:human)
 p cat
+p cat.first.human
