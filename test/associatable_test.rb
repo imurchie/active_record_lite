@@ -35,3 +35,13 @@ p human.cats
 p human.house
 
 p cat.house
+
+
+puts
+puts
+puts "Testing 'includes'"
+matt = Human.where(:fname => "Matt").includes(:cats)
+p matt
+puts
+cat = Cat.where(:id => 1).includes(:human)
+p cat

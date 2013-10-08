@@ -3,6 +3,7 @@ require_relative './associatable'
 require_relative './db_connection'
 require_relative './mass_object'
 require_relative './searchable'
+require_relative "./relation"
 
 
 class SQLObject < MassObject
@@ -31,6 +32,10 @@ class SQLObject < MassObject
     results = DBConnection.execute("SELECT * FROM #{table_name} WHERE id = ?", id)
 
     parse_all(results).first
+  end
+
+  def includes(*args)
+    Relation.new.includes(*args)
   end
 
   def save

@@ -1,3 +1,5 @@
+require_relative "./associatable"
+
 class Relation
   include Enumerable
 
@@ -10,6 +12,11 @@ class Relation
   def where(params)
     wheres << params
 
+    self
+  end
+
+  def includes(*args)
+    included_assocs.push(*args)
     self
   end
 
@@ -51,6 +58,10 @@ class Relation
       values
     end
 
+    def included_assocs
+      @included ||= []
+    end
+
     def run
       results = DBConnection.execute(<<-SQL, *make_where_values)
         SELECT
@@ -61,6 +72,92 @@ class Relation
           #{make_where_clause}
       SQL
 
-      klass.parse_all(results)
+      objs = klass.parse_all(results)
+      run_included_assocs!(objs)
+
+      objs
+    end
+
+    def run_included_assocs!(objs)
+      included_assocs.each do |assoc_name|
+        assoc = klass.assoc_params[assoc_name]
+
+        if assoc.is_a?(HasManyAssocParams)
+          run_included_has_many_assoc!(assoc, objs)
+        elsif assoc.is_a?(BelongsToAssocParams)
+          run_included_belongs_to_assoc!(assoc, objs)
+        end
+      end
+
+      objs
+    end
+
+    def run_included_has_many_assoc!(assoc, objs)
+      keys = objs.map do |obj|
+        obj.instance_variable_get("@#{assoc.primary_key}")
+      end
+
+      query = <<-SQL
+        SELECT
+          *
+        FROM
+          #{assoc.other_table}
+        WHERE
+          #{assoc.other_table}.#{assoc.foreign_key} IN (#{keys.map{ "?" }.join(", ")})
+      SQL
+
+      results = DBConnection.execute(query, *keys)
+      map_has_many_assoc(results, objs, assoc)
+    end
+
+    def run_included_belongs_to_assoc!(assoc, objs)
+      keys = objs.map do |obj|
+        obj.instance_variable_get("@#{assoc.foreign_key}")
+      end
+
+      results = DBConnection.execute(<<-SQL, *keys)
+        SELECT
+          *
+        FROM
+          #{assoc.other_table}
+        WHERE
+          #{assoc.other_table}.#{assoc.primary_key} = ?
+      SQL
+
+      map_belongs_to_assoc(results, objs, assoc)
+    end
+
+    def map_has_many_assoc(results, objs, assoc)
+      assocs = (Hash.new { |h, k| h[k] = [] }).tap do |hash|
+        results.each do |params|
+          key = params[assoc.foreign_key]
+          hash[key] << params
+        end
+      end
+
+      objs.each do |obj|
+        key = obj.instance_variable_get("@#{assoc.primary_key}")
+        results = assocs[key]
+        obj.instance_variable_set("@#{assoc.name}", assoc.other_class.parse_all(results))
+      end
+
+      objs
+    end
+
+    def map_belongs_to_assoc(results, objs, assoc)
+      assocs = {}.tap do |hash|
+        results.each do |params|
+          key = params[assoc.primary_key]
+          hash[key] = params
+        end
+      end
+
+      objs.each do |obj|
+        key = obj.instance_variable_get("@#{assoc.foreign_key}")
+        results = assocs[key]
+        obj.instance_variable_set("@#{assoc.name}", assoc.other_class.parse_all([results]))
+      end
+
+      objs
     end
 end

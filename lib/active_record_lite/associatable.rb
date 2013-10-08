@@ -87,7 +87,11 @@ module Associatable
     assoc = BelongsToAssocParams.new(name, params)
     assoc_params[name] = assoc
 
-    define_method(name) do
+    define_method(name) do |reload = false|
+      if !reload && self.instance_variable_get("@#{assoc.name}")
+        return self.instance_variable_get("@#{assoc.name}")
+      end
+
       primary_key_val = self.instance_variable_get("@#{assoc.foreign_key}")
       results = DBConnection.execute(<<-SQL, primary_key_val)
         SELECT
@@ -103,8 +107,13 @@ module Associatable
 
   def has_many(name, params = {})
     assoc = HasManyAssocParams.new(name, params, self.class.to_s)
+    assoc_params[name] = assoc
 
-    define_method(name) do
+    define_method(name) do |reload = false|
+      if !reload && self.instance_variable_get("@#{assoc.name}")
+        return self.instance_variable_get("@#{assoc.name}")
+      end
+
       foreign_key_val = self.instance_variable_get("@#{assoc.primary_key}")
       results = DBConnection.execute(<<-SQL, foreign_key_val)
         SELECT
@@ -122,7 +131,11 @@ module Associatable
   def has_one_through(name, assoc1, assoc2)
     assoc1 = assoc_params[assoc1]
 
-    define_method(name) do
+    define_method(name) do |reload = false|
+      if !reload && self.instance_variable_get("@#{assoc1.name}")
+        return self.instance_variable_get("@#{assoc1.name}")
+      end
+
       assoc2 = assoc1.other_class.assoc_params[assoc2]
 
       foreign_key_val = self.instance_variable_get("@#{assoc1.foreign_key}")
