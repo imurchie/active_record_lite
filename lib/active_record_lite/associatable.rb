@@ -129,11 +129,12 @@ module Associatable
   end
 
   def has_one_through(name, assoc1, assoc2)
+    assoc_params[name] = [assoc1, assoc2]
     assoc1 = assoc_params[assoc1]
 
     define_method(name) do |reload = false|
       if !reload && self.instance_variable_get("@#{assoc1.name}")
-        return self.instance_variable_get("@#{assoc1p.name}")
+        return self.instance_variable_get("@#{assoc1.name}")
       end
 
       assoc2 = assoc1.other_class.assoc_params[assoc2]
