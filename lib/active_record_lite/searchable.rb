@@ -1,5 +1,5 @@
-require 'db_connection'
-require "relation"
+require_relative 'db_connection'
+require_relative "relation"
 
 module ActiveRecordLite
   module Searchable

@@ -1,9 +1,9 @@
 require "active_support/inflector"
-require './associatable'
-require './db_connection'
-require './mass_object'
-require './searchable'
-require "./relation"
+require_relative './associatable'
+require_relative './db_connection'
+require_relative './mass_object'
+require_relative './searchable'
+require_relative "./relation"
 
 module ActiveRecordLite
   class SQLObject < MassObject

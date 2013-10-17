@@ -1,6 +1,6 @@
 require 'active_support/core_ext/object/try'
 require 'active_support/inflector'
-require 'db_connection.rb'
+require_relative 'db_connection.rb'
 
 module ActiveRecordLite
   class AssocParams

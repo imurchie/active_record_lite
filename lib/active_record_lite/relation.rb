@@ -1,4 +1,4 @@
-require "associatable"
+require_relative "associatable"
 
 module ActiveRecordLite
   class Relation
