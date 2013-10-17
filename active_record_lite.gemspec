@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["imurchie@gmail.com"]
   spec.description   = %q{ActiveRecordLite: A basic version of Rails' ActiveRecord functionality}
   spec.summary       = %q{Basic ORM}
-  spec.homepage      = ""
+  spec.homepage      = "http://imurchie.github.io"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
