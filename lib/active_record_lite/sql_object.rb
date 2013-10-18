@@ -131,7 +131,7 @@ module ActiveRecordLite
       end
 
       def attributes
-        all = schema.keys
+        all = self.class.schema.keys
         all.delete(:@id)
 
         all
