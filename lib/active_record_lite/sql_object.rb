@@ -4,11 +4,13 @@ require_relative './db_connection'
 require_relative './mass_object'
 require_relative './searchable'
 require_relative "./relation"
+require_relative "./hooks"
 
 module ActiveRecordLite
   class SQLObject < MassObject
     extend Searchable
     extend Associatable
+    extend Hooks
 
     def self.set_table_name(table_name)
       @table_name = table_name
@@ -32,6 +34,13 @@ module ActiveRecordLite
       results = DBConnection.execute("SELECT * FROM #{table_name} WHERE id = ?", id)
 
       parse_all(results).first
+    end
+
+
+    def initialize(params)
+      super
+
+      self.class.after_initialize_eval(self)
     end
 
     def includes(*args)
@@ -131,7 +140,7 @@ module ActiveRecordLite
       end
 
       def attributes
-        all = self.class.schema.keys.map { |attribute| "@#{attribute}".to_sym }
+        all = self.class.schema.keys.map { |attribute| "@#{attribute}".to_sym  }
         all.delete(:@id)
 
         all
