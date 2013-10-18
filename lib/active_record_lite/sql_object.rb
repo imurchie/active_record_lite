@@ -131,7 +131,7 @@ class SQLObject < MassObject
     end
 
     def attributes
-      all = instance_variables
+      all = self.class.schema.keys
       all.delete(:@id)
 
       all
