@@ -31,13 +31,14 @@ module ActiveRecordLite
     end
 
     def self.find(id)
+      puts "#{self}#::find(#{id}): 'SELECT * FROM #{table_name} WHERE id = #{id}'"
       results = DBConnection.execute("SELECT * FROM #{table_name} WHERE id = ?", id)
 
       parse_all(results).first
     end
 
 
-    def initialize(params)
+    def initialize(params = {})
       super
 
       self.class.after_initialize_eval(self)
