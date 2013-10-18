@@ -131,7 +131,7 @@ module ActiveRecordLite
       end
 
       def attributes
-        all = self.class.schema.keys
+        all = self.class.schema.keys.map { |attribute| "@#{attribute}".to_sym }
         all.delete(:@id)
 
         all
